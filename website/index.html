@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudyAI – Master Computer Science with AI Power</title>
+  <meta name="description" content="StudyAI is your intelligent study companion for CS students. Get AI tutoring, smart scheduling, and performance analytics—free for verified university students."/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* Landing-specific */
+    body { min-height: 100vh; }
+
+    /* Top Bar */
+    .landing-topbar {
+      height: 64px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; background: white; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .landing-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; color: var(--text-primary); }
+    .landing-logo-icon {
+      width: 38px; height: 38px; background: var(--primary); border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;
+    }
+    .landing-nav { display: flex; align-items: center; gap: 24px; }
+    .landing-nav a { font-weight: 500; color: var(--text-secondary); transition: color var(--transition); }
+    .landing-nav a:hover { color: var(--text-primary); }
+
+    /* Hero */
+    .hero {
+      text-align: center; padding: 80px 48px 72px;
+      max-width: 720px; margin: 0 auto;
+      animation: fadeIn 0.6s ease;
+    }
+    .hero-eyebrow {
+      display: inline-block; padding: 5px 16px; border-radius: var(--radius-full);
+      background: var(--primary-light); color: var(--primary); font-size: 11px;
+      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 24px;
+      border: 1px solid rgba(37,99,235,0.2);
+    }
+    .hero h1 {
+      font-size: 52px; font-weight: 900; line-height: 1.1; color: var(--text-primary);
+      margin-bottom: 20px; letter-spacing: -0.03em;
+    }
+    .hero h1 span { color: var(--primary); }
+    .hero p { font-size: 18px; color: var(--text-secondary); max-width: 500px; margin: 0 auto 40px; line-height: 1.7; }
+
+    /* Features Grid */
+    .features-section { max-width: 1100px; margin: 0 auto; padding: 0 48px 80px; }
+    .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .feature-card {
+      background: white; border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 28px 24px 24px; transition: all 0.25s ease; animation: fadeIn 0.5s ease;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: var(--primary); transform: scaleX(0); transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+    .feature-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); border-color: var(--primary-light); }
+    .feature-card:hover::before { transform: scaleX(1); }
+    .feature-icon-wrap {
+      width: 52px; height: 52px; border-radius: var(--radius);
+      background: var(--primary-light); display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px; font-size: 24px;
+    }
+    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .feature-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+    .feature-preview {
+      border-radius: var(--radius); overflow: hidden; background: var(--bg);
+      height: 100px; display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border);
+    }
+
+    /* Preview mockups */
+    .preview-chat { width: 100%; padding: 12px; }
+    .preview-line { height: 8px; border-radius: 4px; background: #CBD5E1; margin-bottom: 7px; }
+    .preview-line.short { width: 60%; }
+    .preview-line.primary { background: var(--primary-light); width: 80%; }
+    .preview-cal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; padding: 12px; }
+    .preview-cal-block { height: 28px; border-radius: 4px; background: var(--primary-light); }
+    .preview-cal-block:nth-child(2) { background: #D1FAE5; }
+    .preview-cal-block:nth-child(3) { background: #FEF3C7; }
+    .preview-code {
+      font-family: var(--font-mono); font-size: 10px; color: #93C5FD;
+      background: #0F172A; padding: 12px; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: center; gap: 4px;
+    }
+    .preview-code span { display: block; }
+    .preview-code .kw { color: #818CF8; }
+    .preview-code .str { color: #4ADE80; }
+    .preview-bars { display: flex; align-items: flex-end; gap: 6px; padding: 12px 16px; width: 100%; }
+    .preview-bar { background: var(--primary-light); border-radius: 3px 3px 0 0; flex: 1; }
+    .preview-bar:nth-child(4) { background: var(--primary); }
+    .preview-bar:nth-child(5) { background: #93C5FD; }
+
+    /* CTA */
+    .cta-section { text-align: center; padding: 16px 48px 80px; }
+    .cta-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--primary); color: white; font-size: 17px; font-weight: 700;
+      padding: 18px 40px; border-radius: var(--radius-lg); border: none; cursor: pointer;
+      box-shadow: var(--shadow-blue); transition: all 0.25s ease; margin-bottom: 14px;
+    }
+    .cta-btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 40px rgba(37,99,235,0.4); }
+    .cta-sub { font-size: 13px; color: var(--text-muted); }
+    .cta-arrow { transition: transform 0.25s ease; }
+    .cta-btn:hover .cta-arrow { transform: translateX(4px); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border); padding: 20px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      color: var(--text-muted); font-size: 13px;
+    }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { color: var(--text-muted); transition: color var(--transition); }
+    .footer-links a:hover { color: var(--primary); }
+
+    @media (max-width: 900px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero h1 { font-size: 36px; }
+      .landing-topbar { padding: 0 24px; }
+      .features-section, .cta-section { padding-left: 24px; padding-right: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<nav class="landing-topbar">
+  <a href="index.html" class="landing-logo">
+    <span class="landing-logo-icon">🎓</span>
+    StudyAI
+  </a>
+  <div class="landing-nav">
+    <a href="#features">Features</a>
+    <a href="home.html">Dashboard</a>
+    <a href="#faq">FAQ</a>
+    <a href="home.html" class="btn btn-primary btn-sm">Sign In →</a>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-eyebrow">✦ Onboarding System V1.0</div>
+  <h1>Master Computer Science<br/><span>with AI Power</span></h1>
+  <p>Welcome, Future Engineer. Let's walk through the tools designed to supercharge your learning journey.</p>
+</section>
+
+<!-- Features Grid -->
+<section class="features-section" id="features">
+  <div class="features-grid">
+
+    <!-- AI Tutoring -->
+    <div class="feature-card">
+      <div class="feature-icon-wrap">🤖</div>
+      <h3>AI Tutoring</h3>
+      <p>24/7 personalized guidance for complex algorithms and data structures. Get instant explanations when you're stuck.</p>
+      <div class="feature-preview">
+        <div class="preview-chat">
+          <div class="preview-line primary"></div>
+          <div class="preview-line short" style="background:#E2E8F0"></div>
+          <div class="preview-line" style="background:#E2E8F0;width:90%"></div>
+          <div class="preview-line" style="background:var(--primary-light);width:50%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Smart Scheduling -->
+    <div class="feature-card">
+      <div class="feature-icon-wrap">📅</div>
+      <h3>Smart Scheduling</h3>
+      <p>Automated study plans that adapt to your course syllabus and project deadlines. Stay ahead of your curriculum effortlessly.</p>
+      <div class="feature-preview">
+        <div class="preview-cal">
+          <div class="preview-cal-block"></div>
+          <div class="preview-cal-block"></div>
+          <div class="preview-cal-block"></div>
+          <div class="preview-cal-block" style="background:#EDE9FE"></div>
+          <div class="preview-cal-block" style="background:#FEE2E2"></div>
+          <div class="preview-cal-block" style="background:var(--primary-light)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Learning Gateway -->
+    <div class="feature-card">
+      <div class="feature-icon-wrap">💻</div>
+      <h3>Learning Gateway</h3>
+      <p>Organize, search, and run your code snippets in a cloud-synced sandbox. Build your personal technical repository.</p>
+      <div class="feature-preview">
+        <div class="preview-code">
+          <span><span class="kw">class</span> Node {</span>
+          <span>&nbsp;&nbsp;val: <span class="str">any</span>;</span>
+          <span>&nbsp;&nbsp;next: Node | <span class="kw">null</span>;</span>
+          <span>}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance -->
+    <div class="feature-card">
+      <div class="feature-icon-wrap">📊</div>
+      <h3>Performance</h3>
+      <p>Visual insights into your learning progress. Identify strengths and tackle knowledge gaps with data-driven analytics.</p>
+      <div class="feature-preview">
+        <div class="preview-bars" style="align-items:flex-end; height:80px;">
+          <div class="preview-bar" style="height:30%"></div>
+          <div class="preview-bar" style="height:50%"></div>
+          <div class="preview-bar" style="height:45%"></div>
+          <div class="preview-bar" style="height:80%"></div>
+          <div class="preview-bar" style="height:65%"></div>
+          <div class="preview-bar" style="height:90%; background:var(--primary)"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div>
+    <a href="home.html" class="cta-btn">
+      Enter Your Dashboard
+      <span class="cta-arrow">→</span>
+    </a>
+  </div>
+  <p class="cta-sub">No credit card required. Free for verified university students.</p>
+</section>
+
+<!-- Footer -->
+<footer>
+  <span>© 2024 StudyAI Systems Inc. All rights reserved.</span>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Security</a>
+  </div>
+</footer>
+
+</body>
+</html>

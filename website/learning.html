@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learning Center – AI Study Assistant</title>
+    <meta name="description"
+        content="Learn CS through curated YouTube videos and interactive flashcard quizzes. Personalized computer science curriculum." />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        /* Video Cards */
+        .video-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .video-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .video-thumb {
+            position: relative;
+            height: 160px;
+            background: #0F172A;
+            overflow: hidden;
+        }
+
+        .video-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-thumb-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0A192F, #1E3A5F);
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 4px;
+        }
+
+        .play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0);
+            transition: background 0.2s;
+        }
+
+        .video-card:hover .play-overlay {
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .play-btn {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s;
+        }
+
+        .video-card:hover .play-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .video-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .video-views {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .video-info {
+            padding: 14px 16px;
+        }
+
+        .video-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .video-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* YouTube Modal */
+        .yt-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .yt-modal.open {
+            display: flex;
+        }
+
+        .yt-modal-inner {
+            background: #0F172A;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .yt-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: #1E293B;
+            color: white;
+        }
+
+        .yt-modal-title {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .yt-close {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .yt-close:hover {
+            color: white;
+        }
+
+        .yt-embed {
+            position: relative;
+            padding-bottom: 56.25%;
+            background: black;
+        }
+
+        .yt-embed iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Quiz / Flashcard */
+        .quiz-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .quiz-card:hover {
+            box-shadow: var(--shadow);
+            border-color: var(--primary);
+        }
+
+        .quiz-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+        }
+
+        .quiz-info {
+            flex: 1;
+        }
+
+        .quiz-name {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .quiz-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .quiz-difficulty {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-start-quiz {
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 9px 18px;
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-start-quiz:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Flashcard Game */
+        .flashcard-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .flashcard-modal.open {
+            display: flex;
+        }
+
+        .flashcard-container {
+            width: 100%;
+            max-width: 560px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .flashcard-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .flashcard-progress-text {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .flashcard-close {
+            font-size: 24px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .flashcard-close:hover {
+            color: white;
+        }
+
+        .flashcard {
+            width: 100%;
+            min-height: 260px;
+            perspective: 1200px;
+            cursor: pointer;
+        }
+
+        .flashcard-inner {
+            width: 100%;
+            min-height: 260px;
+            border-radius: var(--radius-xl);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front,
+        .flashcard-back {
+            position: absolute;
+            width: 100%;
+            min-height: 260px;
+            border-radius: var(--radius-xl);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            backface-visibility: hidden;
+            text-align: center;
+        }
+
+        .flashcard-front {
+            background: white;
+        }
+
+        .flashcard-back {
+            background: var(--primary);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .flashcard-back .flashcard-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .flashcard-question {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .flashcard-answer {
+            font-size: 16px;
+            line-height: 1.65;
+        }
+
+        .flashcard-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 12px;
+        }
+
+        .flashcard-back .flashcard-hint {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .flashcard-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .fc-btn {
+            padding: 12px 28px;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .fc-btn-wrong {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .fc-btn-wrong:hover {
+            background: #FECACA;
+        }
+
+        .fc-btn-correct {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .fc-btn-correct:hover {
+            background: #A7F3D0;
+        }
+
+        .fc-btn-next {
+            background: var(--primary);
+            color: white;
+        }
+
+        .fc-btn-next:hover {
+            background: var(--primary-dark);
+        }
+
+        .flashcard-progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .flashcard-progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        /* Right sidebar */
+        .learning-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+
+        .sidebar-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .progress-course {
+            margin-bottom: 12px;
+        }
+
+        .progress-course:last-child {
+            margin-bottom: 0;
+        }
+
+        .perf-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .perf-item:last-child {
+            border-bottom: none;
+        }
+
+        .perf-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .perf-dot-green {
+            background: var(--accent-green);
+        }
+
+        .perf-dot-orange {
+            background: var(--accent-orange);
+        }
+
+        .perf-item-info {
+            flex: 1;
+        }
+
+        .perf-title {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .perf-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .perf-chevron {
+            color: var(--text-muted);
+        }
+
+        /* Timer Card */
+        .timer-card {
+            background: linear-gradient(135deg, #1D4ED8, #3B82F6);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            color: white;
+        }
+
+        .timer-card-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            opacity: 0.7;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timer-card p {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .timer-start-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-weight: 700;
+            padding: 10px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .timer-start-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <nav class="topbar">
+        <a href="home.html" class="topbar-logo">
+            <span class="topbar-logo-icon">🎓</span>
+            AI Study Assistant
+        </a>
+        <div class="topbar-nav">
+            <a href="home.html">Dashboard</a>
+            <a href="chatbot.html">Chatbot</a>
+            <a href="timetable.html">Timetable</a>
+            <a href="learning.html" class="active">Learning</a>
+            <a href="performance.html">Analytics</a>
+            <a href="profile.html">Profile</a>
+        </div>
+        <div class="flex gap-12">
+            <div class="topbar-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search resources..." id="resourceSearch" />
+            </div>
+            <div class="avatar">AR</div>
+        </div>
+    </nav>
+
+    <main style="max-width:1200px; margin:0 auto; padding:32px;">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>Learning Center</h1>
+            <p>Personalized computer science curriculum powered by AI</p>
+        </div>
+
+        <div class="learning-layout">
+            <!-- Left Main Content -->
+            <div>
+                <!-- Video Resources -->
+                <div class="section-header">
+                    <h2 class="section-title">▶️ Video Resources</h2>
+                    <a href="#" class="section-link" onclick="showAllVideos()">View all →</a>
+                </div>
+
+                <div class="grid grid-3 gap-16" id="videosGrid" style="margin-bottom:32px">
+                    <!-- Video 1 -->
+                    <div class="video-card" onclick="openVideo('dSC93n-zSn4', 'Data Structures - Linked Lists')">
+                        <div class="video-thumb">
+                            <div class="video-thumb-placeholder">
+                                <div style="text-align:center; color:#60A5FA">
+                                    <div style="font-size:32px; margin-bottom:6px">🔗</div>
+                                    <div style="font-size:11px; font-family:var(--font-mono)">linked_lists.cpp</div>
+                                </div>
+                            </div>
+                            <div class="play-overlay">
+                                <div class="play-btn">▶</div>
+                            </div>
+                            <div class="video-duration">15:20</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-meta">
+                                <span class="tag tag-cs">CS</span>
+                                <span class="video-views">👁 4.8k</span>
+                            </div>
+                            <div class="video-title">Data Structures – Linked Lists</div>
+                            <div class="video-subtitle">Week 3 • Advanced Algorithms</div>
+                        </div>
+                    </div>
+
+                    <!-- Video 2 -->
+                    <div class="video-card" onclick="openVideo('aircAruvnKk', 'Introduction to Neural Networks')">
+                        <div class="video-thumb">
+                            <div class="video-thumb-placeholder">
+                                <div style="text-align:center; color:#A78BFA">
+                                    <div style="font-size:32px; margin-bottom:6px">🧠</div>
+                                    <div style="font-size:11px; font-family:var(--font-mono)">neural_networks.py</div>
+                                </div>
+                            </div>
+                            <div class="play-overlay">
+                                <div class="play-btn">▶</div>
+                            </div>
+                            <div class="video-duration">22:45</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-meta">
+                                <span class="tag tag-ai">AI</span>
+                                <span class="video-views">👁 3.2k</span>
+                            </div>
+                            <div class="video-title">Introduction to Neural Networks</div>
+                            <div class="video-subtitle">Week 5 • Machine Learning</div>
+                        </div>
+                    </div>
+
+                    <!-- Video 3 -->
+                    <div class="video-card" onclick="openVideo('eqnTantk6bY', 'Discrete Mathematics Foundations')">
+                        <div class="video-thumb">
+                            <div class="video-thumb-placeholder">
+                                <div style="text-align:center; color:#34D399">
+                                    <div style="font-size:32px; margin-bottom:6px">∑</div>
+                                    <div style="font-size:11px; font-family:var(--font-mono)">discrete_math.py</div>
+                                </div>
+                            </div>
+                            <div class="play-overlay">
+                                <div class="play-btn">▶</div>
+                            </div>
+                            <div class="video-duration">18:10</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-meta">
+                                <span class="tag tag-math">MATH</span>
+                                <span class="video-views">👁 1.9k</span>
+                            </div>
+                            <div class="video-title">Discrete Mathematics Foundations</div>
+                            <div class="video-subtitle">Week 2 • Core Mathematics</div>
+                        </div>
+                    </div>
+
+                    <!-- Extra videos (hidden by default) -->
+                    <div class="video-card extra-video" style="display:none"
+                        onclick="openVideo('8hly31xKli0', 'Algorithm Design Patterns')">
+                        <div class="video-thumb">
+                            <div class="video-thumb-placeholder">
+                                <div style="text-align:center; color:#FCD34D">
+                                    <div style="font-size:32px; margin-bottom:6px">⚙️</div>
+                                </div>
+                            </div>
+                            <div class="play-overlay">
+                                <div class="play-btn">▶</div>
+                            </div>
+                            <div class="video-duration">31:05</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-meta"><span class="tag tag-cs">CS</span><span class="video-views">👁
+                                    2.1k</span></div>
+                            <div class="video-title">Algorithm Design Patterns</div>
+                            <div class="video-subtitle">Week 7 • Advanced CS</div>
+                        </div>
+                    </div>
+                    <div class="video-card extra-video" style="display:none"
+                        onclick="openVideo('oTGaTs_BBXM', 'OS Memory Management')">
+                        <div class="video-thumb">
+                            <div class="video-thumb-placeholder">
+                                <div style="text-align:center; color:#F87171">
+                                    <div style="font-size:32px; margin-bottom:6px">💾</div>
+                                </div>
+                            </div>
+                            <div class="play-overlay">
+                                <div class="play-btn">▶</div>
+                            </div>
+                            <div class="video-duration">25:30</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-meta"><span class="tag tag-cs">CS</span><span class="video-views">👁
+                                    1.5k</span></div>
+                            <div class="video-title">OS Memory Management</div>
+                            <div class="video-subtitle">Week 8 • Operating Systems</div>
+                        </div>
+                    </div>
+                    <div class="video-card extra-video" style="display:none"
+                        onclick="openVideo('RBSGKsShz5Y', 'Database SQL Joins')">
+                        <div class="video-thumb">
+                            <div class="video-thumb-placeholder">
+                                <div style="text-align:center; color:#60A5FA">
+                                    <div style="font-size:32px; margin-bottom:6px">🗄️</div>
+                                </div>
+                            </div>
+                            <div class="play-overlay">
+                                <div class="play-btn">▶</div>
+                            </div>
+                            <div class="video-duration">19:45</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-meta"><span class="tag tag-cs">CS</span><span class="video-views">👁
+                                    2.8k</span></div>
+                            <div class="video-title">Database SQL Joins & Advanced Queries</div>
+                            <div class="video-subtitle">Week 6 • Database Systems</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Practice Quizzes -->
+                <div class="section-header">
+                    <h2 class="section-title">📝 Practice Quizzes</h2>
+                    <a href="#" class="section-link">View all →</a>
+                </div>
+                <div class="grid grid-2 gap-16" id="quizzesGrid">
+                    <div class="quiz-card" onclick="startQuiz('tree-traversal')">
+                        <div class="quiz-icon" style="background:#EDE9FE">🌳</div>
+                        <div class="quiz-info">
+                            <div class="quiz-name">Tree Traversal</div>
+                            <div class="quiz-meta">15 Questions • 20 mins</div>
+                            <div class="quiz-difficulty">
+                                <span class="tag tag-hard">HARD</span>
+                            </div>
+                        </div>
+                        <button class="btn-start-quiz">Start Quiz</button>
+                    </div>
+
+                    <div class="quiz-card" onclick="startQuiz('os-memory')">
+                        <div class="quiz-icon" style="background:#D1FAE5">💾</div>
+                        <div class="quiz-info">
+                            <div class="quiz-name">OS Memory Basics</div>
+                            <div class="quiz-meta">10 Questions • 10 mins</div>
+                            <div class="quiz-difficulty">
+                                <span class="tag tag-easy">EASY</span>
+                            </div>
+                        </div>
+                        <button class="btn-start-quiz">Start Quiz</button>
+                    </div>
+
+                    <div class="quiz-card" onclick="startQuiz('sql-joins')">
+                        <div class="quiz-icon" style="background:#FEF3C7">🗄️</div>
+                        <div class="quiz-info">
+                            <div class="quiz-name">SQL Joins &amp; Queries</div>
+                            <div class="quiz-meta">12 Questions • 15 mins</div>
+                            <div class="quiz-difficulty">
+                                <span class="tag tag-medium">MEDIUM</span>
+                            </div>
+                        </div>
+                        <button class="btn-start-quiz">Start Quiz</button>
+                    </div>
+
+                    <div class="quiz-card" onclick="startQuiz('network-protocols')">
+                        <div class="quiz-icon" style="background:#DBEAFE">🌐</div>
+                        <div class="quiz-info">
+                            <div class="quiz-name">Network Protocols</div>
+                            <div class="quiz-meta">20 Questions • 25 mins</div>
+                            <div class="quiz-difficulty">
+                                <span class="tag tag-medium">MEDIUM</span>
+                            </div>
+                        </div>
+                        <button class="btn-start-quiz">Start Quiz</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div>
+                <!-- My Progress -->
+                <div class="sidebar-card">
+                    <div class="section-header" style="margin-bottom:14px">
+                        <span class="section-title" style="font-size:15px">📊 My Progress</span>
+                    </div>
+                    <div class="progress-course">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                            <span style="font-size:13px; font-weight:500; color:var(--text-secondary)">Course
+                                Completion</span>
+                            <span style="font-size:13px; font-weight:700; color:var(--primary)">68%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:68%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Performance -->
+                <div class="sidebar-card">
+                    <div class="section-header" style="margin-bottom:14px">
+                        <span class="section-title" style="font-size:15px">Recent Performance</span>
+                    </div>
+                    <div class="perf-item">
+                        <div class="perf-dot perf-dot-green"></div>
+                        <div class="perf-item-info">
+                            <div class="perf-title">Binary Search Trees</div>
+                            <div class="perf-sub">2 days ago • 92% Correct</div>
+                        </div>
+                        <span class="perf-chevron">›</span>
+                    </div>
+                    <div class="perf-item">
+                        <div class="perf-dot perf-dot-orange"></div>
+                        <div class="perf-item-info">
+                            <div class="perf-title">Graph Theory</div>
+                            <div class="perf-sub">4 days ago • 76% Correct</div>
+                        </div>
+                        <span class="perf-chevron">›</span>
+                    </div>
+                    <div class="perf-item">
+                        <div class="perf-dot perf-dot-green"></div>
+                        <div class="perf-item-info">
+                            <div class="perf-title">Intro to Python</div>
+                            <div class="perf-sub">1 week ago • 100% Correct</div>
+                        </div>
+                        <span class="perf-chevron">›</span>
+                    </div>
+                    <button class="btn btn-outline w-full btn-sm" style="margin-top:14px"
+                        onclick="location.href='performance.html'">Detailed Report →</button>
+                </div>
+
+                <!-- Timer Card -->
+                <div class="timer-card">
+                    <div class="timer-card-title">⏱ Start with Timer</div>
+                    <p>You're performing well in "Logic Gates". We suggest spending 15 mins more on "Memory Management"
+                        to balance your mid-term preparation.</p>
+                    <button class="timer-start-btn" onclick="startStudyTimer()">Start Study Timer</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- YouTube Modal -->
+    <div class="yt-modal" id="ytModal">
+        <div class="yt-modal-inner">
+            <div class="yt-modal-header">
+                <span class="yt-modal-title" id="ytModalTitle">Video</span>
+                <span class="yt-close" onclick="closeVideo()">✕</span>
+            </div>
+            <div class="yt-embed">
+                <iframe id="ytIframe" src=""
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flashcard Modal -->
+    <div class="flashcard-modal" id="flashcardModal">
+        <div class="flashcard-container">
+            <div class="flashcard-header">
+                <span class="flashcard-progress-text" id="fcProgressText">Card 1 of 8</span>
+                <div class="flashcard-progress-bar" style="flex:1;margin:0 16px">
+                    <div class="flashcard-progress-fill" id="fcProgressFill" style="width:12.5%"></div>
+                </div>
+                <span class="flashcard-close" onclick="closeFlashcards()">✕</span>
+            </div>
+            <div class="flashcard" id="flashcard" onclick="flipCard()">
+                <div class="flashcard-inner">
+                    <div class="flashcard-front">
+                        <div class="flashcard-label">Question 💡 (click to reveal)</div>
+                        <div class="flashcard-question" id="fcQuestion">What is the time complexity of Binary Search?
+                        </div>
+                        <div class="flashcard-hint">Click the card to see the answer</div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="flashcard-label">Answer ✅</div>
+                        <div class="flashcard-answer" id="fcAnswer">O(log n) — Binary search halves the search space
+                            with each comparison, making it logarithmically efficient.</div>
+                        <div class="flashcard-hint">How well did you know this?</div>
+                    </div>
+                </div>
+            </div>
+            <div class="flashcard-actions" id="fcActions" style="display:none">
+                <button class="fc-btn fc-btn-wrong" onclick="nextCard(false)">✗ Didn't Know</button>
+                <button class="fc-btn fc-btn-correct" onclick="nextCard(true)">✓ Got it!</button>
+            </div>
+            <div class="flashcard-actions" id="fcNextActions">
+                <button class="fc-btn fc-btn-next" onclick="flipCard()">Flip Card</button>
+            </div>
+            <div style="text-align:center; color:rgba(255,255,255,0.6); font-size:13px">
+                Score: <span id="fcScore">0</span> correct / <span id="fcTotal">0</span> answered
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Flashcard Data
+        const quizzes = {
+            'tree-traversal': [
+                { q: 'What is In-Order traversal?', a: 'Left → Root → Right. Produces sorted output for BST.' },
+                { q: 'What is Pre-Order traversal used for?', a: 'Root → Left → Right. Used to copy/serialize a tree structure.' },
+                { q: 'What is Post-Order traversal?', a: 'Left → Right → Root. Used to delete a tree (process children first).' },
+                { q: 'What is the height of a balanced BST with n nodes?', a: 'O(log n) — The tree is split roughly in half at each level.' },
+                { q: 'What is a complete binary tree?', a: 'All levels are fully filled except possibly the last, which is filled left to right.' },
+                { q: 'What traversal is used in BFS?', a: 'Level-order traversal using a Queue data structure.' },
+                { q: 'What is an AVL tree?', a: 'A self-balancing BST where the height difference between subtrees is at most 1.' },
+                { q: 'Time complexity of tree traversal?', a: 'O(n) — Every node must be visited exactly once.' },
+            ],
+            'os-memory': [
+                { q: 'What is virtual memory?', a: 'A technique that allows execution of processes not fully in memory by using disk space as extended RAM.' },
+                { q: 'What is a page fault?', a: 'Occurs when a process accesses a memory page not currently loaded in RAM, triggering a disk read.' },
+                { q: 'What is fragmentation?', a: 'Wasted memory space. Internal = within allocated block. External = between allocated blocks.' },
+                { q: 'What is paging?', a: 'Divides memory into fixed-size blocks (frames/pages) to eliminate external fragmentation.' },
+                { q: 'What is the TLB?', a: 'Translation Lookaside Buffer — a cache for page table entries to speed up virtual-to-physical address translation.' },
+            ],
+            'sql-joins': [
+                { q: 'What does INNER JOIN do?', a: 'Returns rows where there is a match in both tables. Non-matching rows are excluded.' },
+                { q: 'Difference between LEFT and RIGHT JOIN?', a: 'LEFT JOIN includes all rows from left table + matching from right. RIGHT is the reverse.' },
+                { q: 'What is a FULL OUTER JOIN?', a: 'Returns all rows from both tables, with NULLs where there is no match.' },
+                { q: 'What is a self JOIN?', a: 'Joining a table with itself, useful for hierarchical data like org charts.' },
+                { q: 'What is GROUP BY used for?', a: 'Aggregates rows that have the same values in specified columns (used with COUNT, SUM, AVG, etc.).' },
+                { q: 'What is the HAVING clause?', a: 'Filters groups after GROUP BY (like WHERE but for aggregated data).' },
+            ],
+            'network-protocols': [
+                { q: 'What does TCP stand for?', a: 'Transmission Control Protocol — provides reliable, ordered, error-checked delivery of data.' },
+                { q: 'What is the difference between TCP and UDP?', a: 'TCP is reliable but slower. UDP is fast but does not guarantee delivery (used for streaming/gaming).' },
+                { q: 'What is the purpose of DNS?', a: 'Domain Name System — translates human-readable domain names to IP addresses.' },
+                { q: 'What is HTTP vs HTTPS?', a: 'HTTP is unencrypted. HTTPS adds TLS/SSL encryption for secure communication.' },
+                { q: 'What is the OSI Model?', a: '7-layer model: Physical, Data Link, Network, Transport, Session, Presentation, Application.' },
+            ]
+        };
+
+        let currentQuiz = [], currentIdx = 0, score = 0, isFlipped = false;
+        let videosShown = false;
+
+        function startQuiz(quizId) {
+            currentQuiz = quizzes[quizId] || quizzes['tree-traversal'];
+            currentIdx = 0; score = 0; isFlipped = false;
+            updateFlashcard();
+            document.getElementById('flashcardModal').classList.add('open');
+            document.getElementById('fcScore').textContent = 0;
+            document.getElementById('fcTotal').textContent = 0;
+        }
+
+        function updateFlashcard() {
+            const card = currentQuiz[currentIdx];
+            document.getElementById('fcQuestion').textContent = card.q;
+            document.getElementById('fcAnswer').textContent = card.a;
+            document.getElementById('fcProgressText').textContent = `Card ${currentIdx + 1} of ${currentQuiz.length}`;
+            document.getElementById('fcProgressFill').style.width = `${((currentIdx + 1) / currentQuiz.length) * 100}%`;
+            document.getElementById('flashcard').classList.remove('flipped');
+            document.getElementById('fcActions').style.display = 'none';
+            document.getElementById('fcNextActions').style.display = 'flex';
+            isFlipped = false;
+        }
+
+        function flipCard() {
+            if (!isFlipped) {
+                document.getElementById('flashcard').classList.add('flipped');
+                document.getElementById('fcActions').style.display = 'flex';
+                document.getElementById('fcNextActions').style.display = 'none';
+                isFlipped = true;
+            }
+        }
+
+        function nextCard(correct) {
+            const total = parseInt(document.getElementById('fcTotal').textContent) + 1;
+            if (correct) { score++; document.getElementById('fcScore').textContent = score; }
+            document.getElementById('fcTotal').textContent = total;
+            currentIdx++;
+            if (currentIdx >= currentQuiz.length) {
+                const pct = Math.round((score / currentQuiz.length) * 100);
+                document.getElementById('flashcardModal').classList.remove('open');
+                showToast(`🎉 Quiz complete! Score: ${pct}% (${score}/${currentQuiz.length})`, pct >= 70 ? 'success' : '');
+            } else {
+                updateFlashcard();
+            }
+        }
+
+        function closeFlashcards() {
+            document.getElementById('flashcardModal').classList.remove('open');
+        }
+
+        // Video
+        function openVideo(videoId, title) {
+            document.getElementById('ytModalTitle').textContent = title;
+            document.getElementById('ytIframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            document.getElementById('ytModal').classList.add('open');
+        }
+
+        function closeVideo() {
+            document.getElementById('ytIframe').src = '';
+            document.getElementById('ytModal').classList.remove('open');
+        }
+
+        function showAllVideos() {
+            if (!videosShown) {
+                document.querySelectorAll('.extra-video').forEach(v => v.style.display = 'flex');
+                videosShown = true;
+            } else {
+                document.querySelectorAll('.extra-video').forEach(v => v.style.display = 'none');
+                videosShown = false;
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('ytModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeVideo(); });
+        document.getElementById('flashcardModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeFlashcards(); });
+
+        function startStudyTimer() { showToast('⏱️ Study timer started! 15 minutes on Memory Management.', 'success'); }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.className = `toast ${type} show`;
+            setTimeout(() => t.className = 'toast', 3500);
+        }
+
+        // Animate progress bars
+        setTimeout(() => {
+            document.querySelectorAll('.progress-fill').forEach(bar => {
+                bar.style.width = bar.style.width;
+            });
+        }, 300);
+    </script>
+
+</body>
+
+</html>

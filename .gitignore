@@ -1,0 +1,13 @@
+# ── Node.js ──
+node_modules/
+npm-debug.log*
+
+# ── Environment / Secrets ──
+.env
+backend/.env
+
+# ── macOS ──
+.DS_Store
+
+# ── Logs ──
+*.log

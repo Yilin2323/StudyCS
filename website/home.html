@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard – AI Study Assistant</title>
+    <meta name="description"
+        content="Your AI Study Assistant Dashboard. Track your recent activity, core modules, and latest CS news." />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        /* ---- Hero Banner ---- */
+        .hero-banner {
+            background: linear-gradient(135deg, #0F2444 0%, #1E3A5F 60%, #0F2444 100%);
+            border-radius: var(--radius-xl);
+            padding: 44px 48px;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+            color: white;
+            min-height: 260px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 55%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke='%23ffffff08' stroke-width='1'%3E%3Crect x='20' y='20' width='360' height='360'/%3E%3Crect x='40' y='40' width='320' height='320'/%3E%3Crect x='60' y='60' width='280' height='280'/%3E%3Crect x='80' y='80' width='240' height='240'/%3E%3Cline x1='0' y1='0' x2='400' y2='400'/%3E%3Cline x1='400' y1='0' x2='0' y2='400'/%3E%3C/g%3E%3C/svg%3E") center/cover;
+            pointer-events: none;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-full);
+            padding: 5px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: #93C5FD;
+            margin-bottom: 18px;
+            width: fit-content;
+        }
+
+        .hero-banner h1 {
+            font-size: 36px;
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 14px;
+            max-width: 440px;
+        }
+
+        .hero-banner h1 em {
+            color: #60A5FA;
+            font-style: normal;
+        }
+
+        .hero-banner p {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 15px;
+            max-width: 400px;
+            margin-bottom: 28px;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-hero-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.5);
+        }
+
+        .btn-hero-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-hero-outline {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-hero-outline:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ---- Core Modules ---- */
+        .module-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.25s;
+            cursor: pointer;
+        }
+
+        .module-card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-3px);
+            border-color: transparent;
+        }
+
+        .module-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .module-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .module-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .module-link {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: auto;
+        }
+
+        .module-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ---- Two-col layout ---- */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 28px;
+            margin-top: 28px;
+        }
+
+        /* ---- Recent Activity ---- */
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item:hover {
+            background: var(--bg-hover);
+            margin: 0 -16px;
+            padding: 14px 16px;
+            border-radius: var(--radius);
+        }
+
+        .activity-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .activity-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .activity-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .activity-action {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .activity-action.score {
+            color: var(--accent-green);
+        }
+
+        .activity-action.resume {
+            color: var(--primary);
+        }
+
+        .activity-action.done {
+            color: var(--text-muted);
+        }
+
+        /* ---- News Card ---- */
+        .news-card {
+            background: linear-gradient(135deg, #1D4ED8, #3B82F6);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .news-eyebrow {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+        }
+
+        .news-card h3 {
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .news-btn {
+            width: 100%;
+            background: white;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 10px;
+            border-radius: var(--radius);
+            text-align: center;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: block;
+            cursor: pointer;
+        }
+
+        .news-btn:hover {
+            background: var(--primary-light);
+        }
+
+        /* ---- Quick Tools ---- */
+        .quick-tools {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .quick-tool-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            border-radius: var(--radius);
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .quick-tool-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .quick-tool-btn span:first-child {
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <nav class="topbar">
+        <a href="index.html" class="topbar-logo">
+            <span class="topbar-logo-icon">🎓</span>
+            AI Study Assistant
+        </a>
+        <div class="topbar-nav">
+            <a href="home.html" class="active">Dashboard</a>
+            <a href="chatbot.html">Chatbot</a>
+            <a href="timetable.html">Timetable</a>
+            <a href="learning.html">Learning</a>
+            <a href="performance.html">Analytics</a>
+            <a href="profile.html">Profile</a>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px;">
+            <div class="topbar-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search docs, snippets..." id="homeSearch" />
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; cursor:pointer; line-height:1.3;" onclick="location.href='profile.html'">
+                <span id="navUserName" style="font-weight:600; font-size:13px; color:var(--text-primary);">Alex Rivera</span>
+                <button onclick="logout(event)"
+                    style="font-size:11px; color:var(--text-muted); background:none; border:none; text-align:right; cursor:pointer; padding:0; margin:0;">Logout</button>
+            </div>
+            <div id="navUserInitials" class="avatar" onclick="location.href='profile.html'" style="flex-shrink:0;">AR</div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main style="max-width: 1200px; margin: 0 auto; padding: 32px;">
+
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+            <div class="hero-eyebrow">⚡ Engineered for CS Excellence</div>
+            <h1>Master Complex Concepts<br />with <em>AI Logic</em></h1>
+            <p>Your intelligent companion for debugging algorithms, optimizing study schedules, and mastering core
+                Computer Science principles with personalized AI feedback.</p>
+            <div class="hero-actions">
+                <a href="chatbot.html" class="btn-hero btn-hero-primary">▶ Initialize Session</a>
+                <a href="learning.html" class="btn-hero btn-hero-outline">View Roadmap</a>
+            </div>
+        </div>
+
+        <!-- Core Modules -->
+        <div class="section-header">
+            <h2 class="section-title">⚙️ Core Modules</h2>
+            <a href="#" class="section-link">View All Systems →</a>
+        </div>
+        <div class="grid grid-4 gap-16">
+            <div class="module-card" onclick="location.href='chatbot.html'">
+                <div class="module-icon-wrap" style="background:#DBEAFE; color:#1D4ED8">🤖</div>
+                <h3>AI Tutor</h3>
+                <p>Debug code and explain complex algorithms in real-time.</p>
+                <a href="chatbot.html" class="module-link">Launch Terminal →</a>
+            </div>
+            <div class="module-card" onclick="location.href='timetable.html'">
+                <div class="module-icon-wrap" style="background:#D1FAE5; color:#065F46">📅</div>
+                <h3>Smart Schedule</h3>
+                <p>Optimize your study blocks around lab hours and deadlines.</p>
+                <a href="timetable.html" class="module-link">Check Sync →</a>
+            </div>
+            <div class="module-card" onclick="location.href='learning.html'">
+                <div class="module-icon-wrap" style="background:#EDE9FE; color:#5B21B6">📚</div>
+                <h3>Learning Gateway</h3>
+                <p>Curated documentation and peer-reviewed study guides.</p>
+                <a href="learning.html" class="module-link">Access Repo →</a>
+            </div>
+            <div class="module-card" onclick="location.href='performance.html'">
+                <div class="module-icon-wrap" style="background:#FEF3C7; color:#92400E">📈</div>
+                <h3>Performance</h3>
+                <p>Track your mastery level across discrete math and OS.</p>
+                <a href="performance.html" class="module-link">View Stats →</a>
+            </div>
+        </div>
+
+        <!-- Two-column area -->
+        <div class="two-col">
+            <!-- Left: Recent Activity -->
+            <div>
+                <div class="card">
+                    <div class="section-header" style="margin-bottom:8px">
+                        <h2 class="section-title">🕐 Recent Activity</h2>
+                        <a href="#" class="section-link">View All</a>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background:#DBEAFE">📄</div>
+                        <div class="activity-info">
+                            <div class="activity-title">Data Structures Flashcards</div>
+                            <div class="activity-sub">24 cards reviewed • 15m ago</div>
+                        </div>
+                        <div class="activity-action score">+85% Score</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background:#FEF3C7">💻</div>
+                        <div class="activity-info">
+                            <div class="activity-title">Binary Search Debugging</div>
+                            <div class="activity-sub">AI Chat Session • 2h ago</div>
+                        </div>
+                        <a href="chatbot.html" class="activity-action resume">Resume</a>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background:#EDE9FE">📖</div>
+                        <div class="activity-info">
+                            <div class="activity-title">Operating Systems Chapter 4</div>
+                            <div class="activity-sub">Resource Downloaded • 5h ago</div>
+                        </div>
+                        <div class="activity-action done">Completed</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background:#D1FAE5">🎯</div>
+                        <div class="activity-info">
+                            <div class="activity-title">Graph Theory Quiz</div>
+                            <div class="activity-sub">Practice Quiz • 1d ago</div>
+                        </div>
+                        <div class="activity-action score">+76% Score</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background:#FEE2E2">⏱️</div>
+                        <div class="activity-info">
+                            <div class="activity-title">Pomodoro Study Session</div>
+                            <div class="activity-sub">2h 30m tracked • 2d ago</div>
+                        </div>
+                        <div class="activity-action done">Completed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: News + Quick Tools -->
+            <div class="flex flex-col gap-16">
+                <!-- Latest News -->
+                <div class="card" style="padding:20px">
+                    <div class="section-header" style="margin-bottom:14px">
+                        <span class="section-title" style="font-size:15px">⚡ Latest News</span>
+                    </div>
+                    <div class="news-card">
+                        <div class="news-eyebrow">📡 Upcoming in 45 min</div>
+                        <h3>US's computer science grads face 5th-highest unemployment rate</h3>
+                        <div class="news-btn">Read More</div>
+                    </div>
+                </div>
+
+                <!-- Quick Tools -->
+                <div class="card" style="padding:20px">
+                    <div class="section-header" style="margin-bottom:14px">
+                        <span class="section-title"
+                            style="font-size:15px; color:var(--text-muted); font-weight:600; text-transform:uppercase; font-size:11px; letter-spacing:0.06em">Quick
+                            Tools</span>
+                    </div>
+                    <div class="quick-tools">
+                        <button class="quick-tool-btn" onclick="startFocusTimer()">
+                            <span>⏱️</span>
+                            <span>Focus Timer</span>
+                        </button>
+                        <button class="quick-tool-btn" onclick="location.href='chatbot.html'">
+                            <span>⚡</span>
+                            <span>Quick Chat</span>
+                        </button>
+                        <button class="quick-tool-btn" onclick="location.href='learning.html'">
+                            <span>🃏</span>
+                            <span>Flashcards</span>
+                        </button>
+                        <button class="quick-tool-btn" onclick="location.href='timetable.html'">
+                            <span>📅</span>
+                            <span>Schedule</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Study Streak -->
+                <div class="card"
+                    style="padding:20px; background: linear-gradient(135deg, #1E3A5F, #2563EB); color:white; border:none;">
+                    <div
+                        style="font-size:12px; font-weight:700; opacity:0.7; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em">
+                        🔥 Study Streak</div>
+                    <div style="font-size:36px; font-weight:900; margin-bottom:4px;">12 Days</div>
+                    <div style="font-size:13px; opacity:0.8; margin-bottom:16px;">You've hit your daily goal 12 days in
+                        a row!</div>
+                    <button
+                        style="width:100%; background:rgba(255,255,255,0.15); color:white; border:1.5px solid rgba(255,255,255,0.3); border-radius:var(--radius); padding:9px; font-weight:600; font-size:13px; cursor:pointer;">Share
+                        Progress 🎉</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer
+        style="border-top:1px solid var(--border); padding:16px 32px; display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-top:32px;">
+        <span>🎓 © 2024 AI Study Assistant Portal. All system logs active.</span>
+        <div class="flex gap-24">
+            <a href="#" style="color:var(--text-muted)">Privacy Policy</a>
+            <a href="#" style="color:var(--text-muted)">Terms of Service</a>
+            <a href="#" style="color:var(--text-muted)">Support</a>
+            <a href="#" style="color:var(--text-muted)">API Docs</a>
+        </div>
+    </footer>
+
+    <!-- Focus Timer Modal -->
+    <div id="timerModal"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+        <div class="card" style="width:320px; text-align:center; padding:32px;">
+            <div style="font-size:48px; font-weight:900; color:var(--primary); margin-bottom:8px;" id="timerDisplay">
+                25:00</div>
+            <div style="font-size:14px; color:var(--text-muted); margin-bottom:24px;">Pomodoro Focus Session</div>
+            <div class="flex gap-12">
+                <button onclick="toggleTimer()" id="timerBtn" class="btn btn-primary w-full">▶ Start</button>
+                <button onclick="resetTimer()" class="btn btn-secondary">Reset</button>
+            </div>
+            <button onclick="closeTimer()"
+                style="margin-top:16px; font-size:13px; color:var(--text-muted); background:none; border:none; cursor:pointer;">Close</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Focus Timer
+        let timerInterval = null, timeLeft = 25 * 60, running = false;
+        function startFocusTimer() {
+            document.getElementById('timerModal').style.display = 'flex';
+        }
+        function closeTimer() {
+            document.getElementById('timerModal').style.display = 'none';
+            resetTimer();
+        }
+        function toggleTimer() {
+            if (!running) {
+                running = true;
+                document.getElementById('timerBtn').textContent = '⏸ Pause';
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    if (timeLeft <= 0) { clearInterval(timerInterval); running = false; showToast('🍅 Pomodoro complete! Take a break.', 'success'); }
+                }, 1000);
+            } else {
+                clearInterval(timerInterval); running = false;
+                document.getElementById('timerBtn').textContent = '▶ Resume';
+            }
+        }
+        function resetTimer() {
+            clearInterval(timerInterval); running = false; timeLeft = 25 * 60;
+            updateTimerDisplay(); document.getElementById('timerBtn').textContent = '▶ Start';
+        }
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+        }
+
+        // Toast
+        function showToast(msg, type = '') {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.className = `toast ${type} show`;
+            setTimeout(() => { t.className = 'toast'; }, 3500);
+        }
+
+        // Search
+        document.getElementById('homeSearch').addEventListener('keydown', e => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                showToast(`🔍 Searching for: "${e.target.value}"`, '');
+                e.target.value = '';
+            }
+        });
+
+        // ─── AUTHENTICATION CHECK ───
+        const token = localStorage.getItem('study_auth_token');
+        if (!token) {
+            window.location.href = 'login.html';
+        } else {
+            const userStr = localStorage.getItem('study_user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                document.getElementById('navUserName').textContent = user.username;
+                document.getElementById('navUserInitials').textContent = user.username.substring(0, 2).toUpperCase();
+            }
+        }
+
+        window.logout = function (e) {
+            e.stopPropagation(); // Prevent profile navigation
+            localStorage.removeItem('study_auth_token');
+            localStorage.removeItem('study_user');
+            window.location.href = 'login.html';
+        };
+    </script>
+
+</body>
+
+</html>
