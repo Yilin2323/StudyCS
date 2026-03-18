@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
             body: JSON.stringify({
                 system_instruction: { parts: [{ text: systemPrompt || '' }] },
                 contents: messages,
-                generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+                generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
             })
         });
 

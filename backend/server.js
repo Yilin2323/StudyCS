@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Parse JSON bodies
+app.use(express.json({ limit: '50mb' })); // Parse JSON bodies with increased limit for files
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI)

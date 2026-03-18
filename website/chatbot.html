@@ -796,6 +796,7 @@
 
     <script>
         let currentFile = null;
+        let currentFileData = null;
         let isTyping = false;
 
         // Handle file upload
@@ -805,20 +806,34 @@
             currentFile = file;
             document.getElementById('fileNameDisplay').textContent = file.name;
             document.getElementById('fileBadgeArea').style.display = 'block';
-            showToast(`✅ Uploaded: ${file.name}`, 'success');
-            // Simulate AI response to file
-            setTimeout(() => {
-                const histItem = document.createElement('div');
-                histItem.className = 'history-item';
-                histItem.textContent = `📄 ${file.name.replace('.pdf', '').substring(0, 20)}...`;
-                histItem.onclick = () => document.querySelectorAll('.history-item').forEach(h => h.classList.remove('active'));
-                document.getElementById('historyList').insertBefore(histItem, document.getElementById('historyList').firstChild);
-                addMessage('ai', `I've received your document <strong>${file.name}</strong> 📄. I can now:<br/>• Summarize it<br/>• Answer questions about it<br/>• Generate practice quizzes<br/><br/>What would you like to do?`);
-            }, 800);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Url = e.target.result;
+                const base64Data = base64Url.split(',')[1];
+                let mimeType = file.type;
+                if (!mimeType) {
+                    if (file.name.endsWith('.pdf')) mimeType = 'application/pdf';
+                    else if (file.name.endsWith('.txt')) mimeType = 'text/plain';
+                }
+                currentFileData = { mimeType: mimeType, data: base64Data };
+                showToast(`✅ Uploaded: ${file.name}`, 'success');
+                // Simulate AI response to file
+                setTimeout(() => {
+                    const histItem = document.createElement('div');
+                    histItem.className = 'history-item';
+                    histItem.textContent = `📄 ${file.name.replace('.pdf', '').substring(0, 20)}...`;
+                    histItem.onclick = () => document.querySelectorAll('.history-item').forEach(h => h.classList.remove('active'));
+                    document.getElementById('historyList').insertBefore(histItem, document.getElementById('historyList').firstChild);
+                    addMessage('ai', `I've received your document <strong>${file.name}</strong> 📄. I can now:<br/>• Summarize it<br/>• Answer questions about it<br/>• Generate practice quizzes<br/><br/>What would you like to do?`);
+                }, 800);
+            };
+            reader.readAsDataURL(file);
         }
 
         function removeFile() {
             currentFile = null;
+            currentFileData = null;
             document.getElementById('fileBadgeArea').style.display = 'none';
             document.getElementById('fileUpload').value = '';
             document.getElementById('chatFileUpload').value = '';
@@ -908,8 +923,31 @@ When writing code use fenced code blocks. Keep answers concise but thorough.`;
         }
 
         async function respondToMessage(text) {
+            let userParts = [];
+            if (currentFileData) {
+                if (currentFileData.mimeType === 'text/plain' || currentFileData.mimeType === 'text/csv') {
+                    // Quick decode for plaintext readability by the model
+                    try {
+                        const textContent = atob(currentFileData.data);
+                        userParts.push({ text: `[Document Context: ${currentFile.name}]\n${textContent}\n\n` });
+                    } catch (e) {
+                        userParts.push({ inlineData: currentFileData });
+                    }
+                } else {
+                    userParts.push({
+                        inlineData: {
+                            mimeType: currentFileData.mimeType,
+                            data: currentFileData.data
+                        }
+                    });
+                }
+                currentFileData = null;
+                removeFile(); // Visually detach it so user knows it was consumed
+            }
+            userParts.push({ text });
+
             // Append user turn to history
-            conversationHistory.push({ role: 'user', parts: [{ text }] });
+            conversationHistory.push({ role: 'user', parts: userParts });
 
             try {
                 const res = await fetch(CHAT_PROXY_URL, {
